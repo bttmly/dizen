@@ -4,7 +4,7 @@
   "description": "isomorphic object decoration",
   "main": "./lib/index.js",
   "scripts": {
-    "test": "mocha --compilers coffee:coffee-script/register ./test/test.coffee -R spec",
+    "test": "mocha --compilers coffee:coffee-script/register ./test/index.coffee -R spec",
     "build": "coffee -cb -o ./lib ./src",
     "watch": "coffee -wb -o ./lib ./src"
   },
@@ -14,5 +14,8 @@
     "extend": "^2.0.0",
     "hash-exchange": "^1.0.0",
     "json-stable-stringify": "^1.0.0"
+  },
+  "devDependencies": {
+    "chai": "^1.9.2"
   }
 }
