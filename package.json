@@ -1,0 +1,18 @@
+{
+  "name": "dizen",
+  "version": "0.1.0",
+  "description": "isomorphic object decoration",
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "mocha --compilers coffee:coffee-script/register ./test/test.coffee -R spec",
+    "build": "coffee -cb -o ./lib ./src",
+    "watch": "coffee -wb -o ./lib ./src"
+  },
+  "author": "Nick Bottomley (github.com/nickb1080)",
+  "license": "MIT",
+  "dependencies": {
+    "extend": "^2.0.0",
+    "hash-exchange": "^1.0.0",
+    "json-stable-stringify": "^1.0.0"
+  }
+}
