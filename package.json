@@ -11,7 +11,9 @@
   },
   "author": "Nick Bottomley (github.com/nickb1080)",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "function-bind": "^1.0.2"
+  },
   "devDependencies": {
     "chai": "^1.9.2",
     "coffee-script": "^1.8.0",

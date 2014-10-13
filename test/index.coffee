@@ -1,12 +1,15 @@
+Function::bind or= require "function-bind"
+
 require( "chai" ).should()
 
 dizen = require "../src/"
 
 
-class House
-  constructor: ( @_sq_ft ) ->
-  get_sq_ft: -> @_sq_ft
+###
 
+Decorators for tests.
+
+###
 
 bedroom_decorator =
   decorator_name: "bedroom_decorator"
@@ -92,7 +95,9 @@ describe "decorate", ->
 
   house = undefined
   beforeEach ->
-    house = new House 1000
+    house = 
+      sq_ft: 1000
+      get_sq_ft: -> @_sq_ft
 
   it "decorates an object with properties and methods from another object", ->
     dizen.decorate house, bedroom_decorator
@@ -109,6 +114,8 @@ describe "decorate", ->
     house.get_bedrooms().should.equal 1
     house.get_sq_ft().should.equal 1225
     ( house.init? ).should.equal false
+
+  it "can be used to dec"
 
   it "calls the decorator's `init` method *after* adding other methods and properties", ->
     ( -> dizen.decorate house, error_decorator ).should.not.throw()
@@ -136,7 +143,7 @@ describe "decorate", ->
   it "throws an error when a decorator doesn't have a string `decorator_name` property", ->
     ( -> dizen.decorate house, unnamed_decorator ).should.throw()
 
-  it "throws errors on attempted overwrites when `no_overwrite` option is truthy", ->
+  xit "throws errors on attempted overwrites when `no_overwrite` option is truthy", ->
     # if already de
 
 
