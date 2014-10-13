@@ -96,7 +96,7 @@ describe "decorate", ->
   house = undefined
   beforeEach ->
     house = 
-      sq_ft: 1000
+      _sq_ft: 1000
       get_sq_ft: -> @_sq_ft
 
   it "decorates an object with properties and methods from another object", ->
