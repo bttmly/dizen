@@ -1,6 +1,6 @@
 Function::bind or= require "function-bind"
 
-require( "chai" ).should()
+should = require( "chai" ).should()
 
 dizen = require "../src/"
 
@@ -11,6 +11,20 @@ Decorators for tests.
 
 ###
 
+attempt = ( fn ) ->
+  ret = undefined
+  try
+    ret = fn
+  catch e
+    # ...
+
+attempt = ( fn ) ->
+  try
+    ret = fn()
+  catch e
+    ret = e
+  ret
+  
 bedroom_decorator =
   decorator_name: "bedroom_decorator"
   init: ->
@@ -85,6 +99,11 @@ bind_test_decorator =
 unnamed_decorator =
   prop: true
 
+no_overwrite_decorator =
+  decorator_name: "no_overwrite_decorator"
+  can_overwrite: false
+  _sq_ft: 2000
+
 ###
 
 Tests
@@ -115,8 +134,6 @@ describe "decorate", ->
     house.get_sq_ft().should.equal 1225
     ( house.init? ).should.equal false
 
-  it "can be used to dec"
-
   it "calls the decorator's `init` method *after* adding other methods and properties", ->
     ( -> dizen.decorate house, error_decorator ).should.not.throw()
 
@@ -141,13 +158,14 @@ describe "decorate", ->
     house.prop.should.equal true
 
   it "throws an error when a decorator doesn't have a string `decorator_name` property", ->
-    ( -> dizen.decorate house, unnamed_decorator ).should.throw()
+    err = attempt -> dizen.decorate house, unnamed_decorator
+    err.should.be.instanceof Error
+    err.message.should.equal "Decorators must have a valid `decorator_name` property."
 
-  xit "throws errors on attempted overwrites when `no_overwrite` option is truthy", ->
-    # if already de
-
-
-
+  it "throws errors on attempted overwrites when `can_overwrite` option is falsy", ->
+    err = attempt -> dizen.decorate house, no_overwrite_decorator
+    err.should.be.instanceof Error
+    err.message.should.equal "Refusing to overwrite _sq_ft"
 
 
 

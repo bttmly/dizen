@@ -2,26 +2,19 @@ NO_COPY =
   "decorator_name": 1
   "init": 1
   "cleanup": 1
-  "can_be_overwritten": 1
   "can_overwrite": 1
   "bind_methods": 1
-  "safe_methods": 1
 
 noop = ->
-  
+
 merge = ( target, sources... ) ->
   for source in sources
     for own key, val of source
       target[key] = val
   target
 
-nonwritable = ( obj, key, val ) ->
-  Object.defineProperty obj, key
-    enumerable: true
-    value: val
-
 decorator_defaults = ->
-  safe_methods: true
+  can_overwrite: true
   bind_methods: false
 
 is_pojo = do ->
@@ -39,7 +32,7 @@ use = ( dec ) ->
 
 validate_decorator = ( dec ) ->
   unless typeof dec.decorator_name is "string"
-    throw new Error "Bedizen decorators must have a valid `decorator_name` property."
+    throw new Error "Decorators must have a valid `decorator_name` property."
 
 # add the basic dizen properties to an object if it doesn't have them
 dizen_base = ( obj = {} ) ->
@@ -52,7 +45,8 @@ actual_decorate = ( obj, dec ) ->
   { bind_all, can_overwrite } = dec
   for own key, val of dec
     continue if NO_COPY[key]
-    continue if obj[key]? and not can_overwrite
+    unless can_overwrite or not obj[key]?
+      throw new Error "Refusing to overwrite #{ key }"
     obj[key] = if bind_all and typeof val is "function" then val.bind obj else val
   obj
 
