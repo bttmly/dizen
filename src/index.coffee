@@ -5,6 +5,11 @@ NO_COPY =
   "can_overwrite": 1
   "bind_methods": 1
 
+decorate_base =
+  cleanup: ->
+  decorate: ( dec, opt ) ->
+    decorate @, dec, opt
+
 noop = ->
 
 merge = ( target, sources... ) ->
@@ -37,7 +42,7 @@ validate_decorator = ( dec ) ->
 # add the basic dizen properties to an object if it doesn't have them
 dizen_base = ( obj = {} ) ->
   obj.cleanup or= noop
-  obj._
+
 
 # copy properties from the decorator to the object, subject to the provided options
 actual_decorate = ( obj, dec ) ->
@@ -92,6 +97,19 @@ sequence = ( decs ) ->
     # returns a function
     # registry can hold functions directly that just get applied to the object
 
+make_decorator = ( dec ) ->
+  ( obj, opt ) ->
+    dizen_base obj
+    actual_decorate obj, dec
+    set_cleanup obj, dec
+    do_init obj, dec, opt
+
+make_composite_decorator = ( decs... ) ->
+  decs = arguments[0] if Array.isArray arguments[0]
+  decs = decs.map make_decorator
+  ( obj, opt ) ->
+    dec( obj, opt ) for dec in decs
+    obj
 
 module.exports =
   decorate: decorate
