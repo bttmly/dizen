@@ -1,4 +1,9 @@
-NO_COPY = ["decorator_name", "init", "cleanup"]
+NO_COPY = 
+  "decorator_name": 1
+  "init": 1
+  "cleanup": 1
+  "no_overwrite": 1
+  "bind_methods": 1
   
 
 ###
@@ -7,7 +12,22 @@ bind_all: Boolean
 init: Function
 cleanup: Function
 ###
-  
+
+merge = ( target, sources... ) ->
+  for source in sources
+    for own key, val of source
+      target[key] = val
+  target
+
+decorator_defaults = ->
+  no_overwrite: true
+  bind_methods: false
+
+is_pojo = do ->
+  gpo = Object.getPrototypeOf
+  obj_proto = Object::
+  ( obj ) ->
+    obj_proto is gpo obj
 
 is_nil = ( obj ) ->
   obj is null or obj is undefined
@@ -24,38 +44,60 @@ use = ( dec ) ->
   if registry[dec.decorator_name]
     throw new Error()
 
-decorate = ( obj, dec, options ) ->
-  dec = registry[dec] if typeof dec is "string"
-  throw new Error( "Invalid decorator" ) if is_nil dec
+validate_decorator = ( dec ) ->
+  unless typeof dec.decorator_name is "string"
+    throw new Error "Bedizen decorators must have a valid `decorator_name` property."
 
+# add the basic dizen properties to an object if it doesn't have them
+dizen_base = ( obj ) ->
+  obj.cleanup or= noop
 
-  # copy properties and methods
-  for own prop of dec when prop not in NO_COPY
-    obj[prop] = dec[prop]
-  
-  # call decorator's init method
-  if typeof dec.init is "function"
-    dec.init.call( obj, options )
+# copy properties from the decorator to the object, subject to the provided options
+actual_merge = ( obj, dec ) ->
+  merge decorator_defaults(), dec
+  { bind_all, no_overwrite } = dec
+  for own key, val of dec
+    continue if NO_COPY[key]
+    continue if obj[key]? and no_overwrite
+    obj[key] = if bind_all and typeof val is "function" then val.bind obj else val
+  obj
 
-  # set cleanup to no-op if not defined
-  obj.cleanup = noop unless obj.cleanup
-
-  # if decorator has a cleanup method, add it to the cleanup chain
-  if obj.cleanup and dec.cleanup and typeof dec.cleanup is "function"
+# set the object's cleanup chain
+set_cleanup = ( obj, dec ) ->
+  if typeof dec.cleanup is "function"
     cleanup = obj.cleanup
     obj.cleanup = ->
-      do cleanup
-      dec.cleanup.call( obj )
+      cleanup()
+      dec.cleanup.call obj
 
-  if is_nil obj.bedizen
-    obj.bedizen = ( dec, options ) -> decorate dec, @, options
-  
-  # return decorated object
+# call the decorator's init method, if extant
+do_init = ( obj, dec, opt ) ->
+  dec.init.call obj, opt if typeof dec.init is "function"
+
+# normalize the decorator argument into an array of decorator objects
+get_decorators = ( dec ) ->
+  if Array.isArray dec
+    decs = dec.map ( str ) -> 
+      if typeof str is "string" then str else registry[str]
+  else if typeof dec is "string"
+    decs = [registry[dec]]
+  else 
+    decs = [dec]
+  validate_decorator dec for dec in decs
+  decs
+
+# actually decorate it
+decorate = ( obj, dec, opt = {} ) ->
+  get_decorators dec
+  dizen_base obj
+  actual_merge obj, dec
+  set_cleanup obj, dec
+  do_init obj, dec, opt
   obj
 
 # flip the order of options and obj for simple partial application w options
-flip_decorate = ( dec, options, obj ) ->
-  decorate( dec, obj, options )
+flip_decorate = ( dec, opt, obj ) ->
+  decorate( dec, obj, opt )
 
 module.exports =
   decorate: decorate

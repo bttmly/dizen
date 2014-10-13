@@ -2,7 +2,7 @@
   "name": "dizen",
   "version": "0.1.0",
   "repository": "https://github.com/nickb1080/dizen.git",
-  "description": "isomorphic object decoration",
+  "description": "pluggable object decoration",
   "main": "./lib/",
   "scripts": {
     "test": "mocha --compilers coffee:coffee-script/register ./test/index.coffee -R spec",
